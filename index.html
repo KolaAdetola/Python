@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nile University - Make Payment</title>
+
+    <!-- Paystack Inline JS V2 -->
+    <script defer src="https://js.paystack.co/v2/inline.js"></script>
+
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="antialiased font-sans">
+
+    <!-- Background Layer -->
+    <div class="w-full min-h-screen bg-cover bg-center bg-no-repeat flex items-center justify-center p-4"
+         style="background-image: url('https://payment.nileuniversity.edu.ng/static/payments/img/bg-login.jpeg');">
+
+        <!-- Card Container -->
+        <div class="w-full max-w-xl bg-white rounded-lg shadow-xl p-6 sm:p-8 my-8">
+
+            <!-- Logo -->
+            <div class="flex justify-center mb-6">
+                <img 
+                    src="https://payment.nileuniversity.edu.ng/static/payments/img/logo.svg" 
+                    alt="Nile University of Nigeria" 
+                    class="w-full max-w-md object-contain"
+                    onerror="this.onerror=null; this.src='https://via.placeholder.com/400x120?text=NILE+UNIVERSITY+OF+NIGERIA';"
+                />
+            </div>
+
+            <!-- Header -->
+            <h2 class="text-center text-gray-600 text-l font-normal mb-6">Make Payment</h2>
+
+            <!-- Quick Guide Accordion -->
+            <div 
+                id="quickGuideToggle" 
+                onclick="toggleQuickGuide()" 
+                class="bg-gray-100 rounded-md p-4 mb-6 border border-gray-100 flex justify-between items-center cursor-pointer select-none transition hover:bg-gray-200/70"
+            >
+                <span class="text-gray-700 text-base font-normal">Quick Guide</span>
+                <span id="accordionIcon" class="text-gray-500 font-bold">&minus;</span>
+            </div>
+
+            <!-- Quick Guide Collapsible Content -->
+            <div id="quickGuideContent" class="mb-6 p-4 bg-blue-50 text-gray-700 rounded-md text-sm leading-relaxed border border-blue-100">
+                <ul class="list-disc pl-5 space-y-1">
+                    <li>Enter your valid <strong>Student ID</strong> (e.g., 20230001).</li>
+                    <li>Enter your <strong>Email Address</strong>.</li>
+                    <li>Click <strong>Verify</strong> to proceed with your Paystack payment.</li>
+                </ul>
+            </div>
+
+            <!-- Form -->
+            <form id="paymentForm" onsubmit="payWithPaystack(event)">
+                
+                <!-- Student ID Field -->
+                <div class="mb-5">
+                    <label for="studentId" class="block text-gray-800 font-bold text-sm mb-2">
+                        Student ID
+                    </label>
+                    <input 
+                        type="text" 
+                        id="studentId" 
+                        name="studentId" 
+                        placeholder="Student ID (20230001)" 
+                        required
+                        class="w-full px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-800 placeholder-gray-400 text-base"
+                    />
+                </div>
+
+                <!-- Email Field -->
+                <div class="mb-6">
+                    <label for="email" class="block text-gray-800 font-bold text-sm mb-2">
+                        Email
+                    </label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        placeholder="Email Address" 
+                        required
+                        class="w-full px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-800 placeholder-gray-400 text-base"
+                    />
+                </div>
+
+                <!-- Amount to pay: -->
+                 <div class="mb-6">
+                    <label for="amount" class="block text-gray-800 font-bold text-sm mb-2">
+                        Amount to Pay
+                    </label>
+                    <input 
+                        type="text" 
+                        id="amount" 
+                        name="amount" 
+                        placeholder="Amount (NGN)" 
+                        required
+                        class="w-full px-4 py-3 rounded border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-800 placeholder-gray-400 text-base"
+                    />
+                </div>
+
+                <!-- Submit Button -->
+                <button 
+                    type="submit" 
+                    class="w-full bg-purple-500 hover:bg-purple-600 text-white font-semibold py-3.5 px-4 rounded shadow transition duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 text-base"
+                >
+                    pay now
+                </button>
+                
+            </form>
+        </div>
+
+    </div>
+
+    <!-- Script Section -->
+    <script>
+        // Toggle Quick Guide accordion
+        function toggleQuickGuide() {
+            const content = document.getElementById('quickGuideContent');
+            const icon = document.getElementById('accordionIcon');
+            
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.innerHTML = '&minus;';
+            } else {
+                content.classList.add('hidden');
+                icon.innerHTML = '&#43;';
+            }
+        }
+
+        // Paystack Inline JS V2 Integration
+        function payWithPaystack(event) {
+            event.preventDefault();
+
+            const amount = document.getElementById('amount').value;
+            const email = document.getElementById('email').value;
+            const studentId = document.getElementById('studentId').value;
+
+            // Replace with your real Paystack Public Key
+            const publicKey = 'pk_live_3d7d5858200af13ec51fad4570b6c3e3cc934705';
+
+            // Paystack Inline JS V2 syntax
+            const paystack = new PaystackPop();
+            paystack.newTransaction({
+                key: publicKey,
+                email: email,
+                amount: amount * 100, // Amount in kobo (500000 kobo = 5,000 NGN)
+                currency: 'NGN',
+                metadata: {
+                    custom_fields: [
+                        {
+                            display_name: "Student ID",
+                            variable_name: "student_id",
+                            value: studentId
+                        }
+                    ]
+                },
+                onSuccess: (transaction) => {
+                    alert('Payment complete! Reference: ' + transaction.reference);
+                },
+                onCancel: () => {
+                    alert('Transaction was not completed, window closed.');
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>
